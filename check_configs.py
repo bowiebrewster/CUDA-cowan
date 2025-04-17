@@ -11,7 +11,7 @@ def main(configuration):
     """
 
     if len(configuration) != 6:
-        raise Exception("Configuration must be length 6 others not implemented")
+        raise Exception("Configuration must be length 6 others not implemented") #TODO
     
     l_map = {'s': 0, 'p': 1, 'd': 2, 'f': 3, 'g': 4, 'h': 5, 'i': 6, 'k': 7}
 
