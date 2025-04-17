@@ -12,7 +12,7 @@ def copy_ing11out_files(source_dir, destination_dir):
         for file in files:
             if file == "ING11":
                 source_file = os.path.join(root, file)
-                new_filename = f"ING11_{count}"
+                new_filename = f"ING11_{count}.txt"
                 destination_file = os.path.join(destination_dir, new_filename)
 
                 shutil.copy2(source_file, destination_file)

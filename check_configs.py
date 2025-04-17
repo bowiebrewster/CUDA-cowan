@@ -1,4 +1,5 @@
 
+
 def count_parameters(configuration):
     """
     Counts the number of Eav, Fk, zeta, and other parameters for a given electron configuration.
