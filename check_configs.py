@@ -1,6 +1,5 @@
 
-
-def count_parameters(configuration):
+def main(configuration):
     """
     Counts the number of Eav, Fk, zeta, and other parameters for a given electron configuration.
 
@@ -14,7 +13,6 @@ def count_parameters(configuration):
     if len(configuration) != 6:
         raise Exception("Configuration must be length 6 others not implemented")
     
-
     l_map = {'s': 0, 'p': 1, 'd': 2, 'f': 3, 'g': 4, 'h': 5, 'i': 6, 'k': 7}
 
     ni = int(configuration[0])
@@ -45,8 +43,6 @@ def count_parameters(configuration):
     Fk(li,li).  If IABG = 2 or 4, then "Fk" represents F1, F2, F3, ... Fm, 
     and k likewise increases in unit steps for the Gk.
     """
-
-
 
     if 2 <= wi <= 4 * li:  # There are no Fk(li,li) unless 2.LE.wi.LE.4li;
         counts['Fk_ii'] += li 

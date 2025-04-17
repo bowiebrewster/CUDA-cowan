@@ -31,7 +31,7 @@ def parse_ing11(file_path):
         match2 = re.match(rf'({ion_pattern})\s+(\S+)\s+(\d+)\s+(.*)', line)
         if match2 and stage <= 2:
             stage = 2
-            filtered_data = [item for item in line.split()[4:-1] if 'hr' not in item and '0.00E+' not in item and not float(item) == 0]
+            filtered_data = [item for item in line.split()[3:-1] if 'hr' not in item and '0.00E+' not in item and not float(item) == 0]
             comb_key= line.split()[0]+" "+line.split()[1]
             parameters[comb_key] = filtered_data
 
