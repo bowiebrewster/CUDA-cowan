@@ -8,7 +8,9 @@ import time
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
 
-def generate_symmetric_matrix_with_zeros(n, zero_percentage, min_val=1, max_val=10):
+def generate_symmetric_matrix_with_zeros(n:int, zero_percentage:float, min_val=1, max_val=10):
+    if zero_percentage < 0.01 or zero_percentage > .99:
+        raise Exception("zero_percentage should be between 0.01 and 0.99")
     """
     Generate an n x n symmetric matrix with random integers, where
     a certain percentage of entries are zero and symmetric.
