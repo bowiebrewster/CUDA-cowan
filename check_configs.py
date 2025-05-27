@@ -1,15 +1,4 @@
-
-def main(configuration):
-    """
-    Counts the number of Eav, Fk, zeta, and other parameters for a given electron configuration.
-
-    Args:
-        configuration (str): The electron configuration (e.g., "4p54d2").
-
-    Returns:
-        dict: A dictionary with counts of Eav, Fk, zeta, Fk_ij, and Gk_ij parameters.
-    """
-
+def config_string_to_int(configuration):
     if len(configuration) != 6:
         raise Exception("Configuration must be length 6 others not implemented") #TODO
     
@@ -21,7 +10,11 @@ def main(configuration):
     nj = int(configuration[3])
     lj = l_map[configuration[4]]
     wj = int(configuration[5])
+    return ni, li, wi, nj, lj, wj
 
+
+def main(configuration):
+    ni, li, wi, nj, lj, wj = config_string_to_int(configuration)
 
     # Initialize counts
     counts = {
