@@ -26,3 +26,26 @@ def run_shell_script():
 
 # Call the function to run the shell script
 run_shell_script()
+
+
+#rename outputfiles to txtfiles for easier reading
+def totxt(substr: str):
+    ing11_path = os.path.join(script_dir, substr)
+    ing11_txt_path = os.path.join(script_dir, substr + ".txt")
+
+    if os.path.exists(ing11_path):
+        # Delete the .txt version if it already exists
+        if os.path.exists(ing11_txt_path):
+            os.remove(ing11_txt_path)
+            print(f"Deleted existing file {substr}.txt.")
+
+        # Rename the file
+        os.rename(ing11_path, ing11_txt_path)
+        print(f"Renamed {substr} to {substr}.txt.")
+    else:
+        print(f"File {substr} not found.")
+
+
+totxt("ING11")
+totxt("OUT2")
+totxt("OUT36")

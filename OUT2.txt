@@ -6,8 +6,8 @@
  P 6    D 6    S 0    S 0    S 0    S 0    S 0    S 0         Sn8+   4p64d6          EAV=  -1350649.787 KK     EKIN=   0.0000 RY
  P 5    D 7    F 0    S 0    S 0    S 0    S 0    S 0         Sn8+   4p54d7          EAV=  -1350045.609 KK     EKIN=   0.0000 RY
  P 6    D 5    F 1    S 0    S 0    S 0    S 0    S 0         Sn8+   4d54f1          EAV=  -1350071.830 KK .
-Finished at                                  13:58:14.44, Tue 07/01/2025
-Time spent:                                  0 hr 0 min 0.4 sec
+Finished at                                  14:06:44.30, Tue 07/01/2025
+Time spent:                                  0 hr 0 min 0.3 sec
  1.00  1.00  1.00
      0.00000     0.00000     0.00000     3.98104
 1
