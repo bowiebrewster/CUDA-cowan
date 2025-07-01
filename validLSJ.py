@@ -46,7 +46,6 @@ def PossibleLSJ(configuration: str):
 
     return result
 
-print(PossibleLSJ('4p54d3'))
 
 # we have sets of 
 
@@ -105,9 +104,6 @@ def total_possible_LS(config_dict):
 
     return unionset
 
-combinedict = PossibleLSJ('4p54d3')
-tpl = total_possible_LS(combinedict)
 
-print(tpl)
 
 
