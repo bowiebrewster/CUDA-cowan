@@ -1,51 +1,113 @@
-from itertools import combinations, product
+import pandas as pd
+from itertools import product
 
-def get_ml_values(l):
-    return list(range(-l, l + 1))
+def ConfigParse(configuration):
+    if len(configuration) % 3 != 0:
+        raise Exception("length of configuration must be mutiple of 3")
+    
+    configuration = configuration.lower()
 
-def get_ms_values():
-    return [-0.5, 0.5]
+    l_map = {'s': 0, 'p': 1, 'd': 2, 'f': 3, 'g': 4, 'h': 5, 'i': 6, 'k': 7, 'l':8, 'm':9, 'n':10 ,'o':11, 'q':12}
 
-def generate_configurations(l, e):
-    ml_vals = get_ml_values(l)
-    ms_vals = get_ms_values()
-    orbitals = list(product(ml_vals, ms_vals))
-    return list(combinations(orbitals, e))
+    parsed = []
+    for i in range(int(len(configuration)/3)):
 
-def total_L_and_S(config):
-    L = sum(ml for ml, ms in config)
-    S = sum(ms for ml, ms in config)
-    return L, S
+        ni = int(configuration[3 * i + 0])
+        li = l_map[configuration[3 * i + 1]]
+        wi = int(configuration[3 * i + 2])
+        parsed.append((ni, li, wi))
 
-def possible_J(L, S):
-    min_J = abs(L - S)
-    max_J = L + S
-    return [j for j in range(int(2 * min_J), int(2 * max_J) + 1, 1)]  # 2*J
-    # Dividing by 2 later to get float J
+    return parsed
 
-def calculate_LSJ(n1, l1, e1, n2, l2, e2):
-    configs1 = generate_configurations(l1, e1)
-    configs2 = generate_configurations(l2, e2)
+#allowed symmetric electrons values ASEV
+ASEV = pd.read_csv('permitted_ls_terms.csv')
 
-    LS_set = set()
-    for c1 in configs1:
-        for c2 in configs2:
-            full_config = c1 + c2
-            if len(set(full_config)) == len(full_config):  # Pauli exclusion
-                L, S = total_L_and_S(full_config)
-                LS_set.add((L, S))
+#uncombined
+def PossibleLSJ(configuration: str):
+    result = {}
 
-    results = set()
-    for L, S in LS_set:
-        for j2 in possible_J(L, S):
-            results.add((L, S, j2 / 2))  # convert 2*J back to J
+    # Step through the configuration in chunks of 3 characters
+    for i in range(0, len(configuration), 3):
+        conf_chunk = configuration[i:i+3]  # e.g., '4p3'
+        n, l, w = ConfigParse(conf_chunk)[0]     # Assuming LandS returns a list with one tuple
 
-    return sorted(results, key=lambda x: (x[0], x[1], x[2]))
+        if w == 4 * l + 2:  # Full subshell, skip
+            continue
+        if w > 2 * l + 1:
+            w = 4 * l + 2 - w # Holes are equivalent to electrons
+            
+        subset = ASEV[(ASEV['l'] == l) & (ASEV['w'] == w)]
+        pairs = list(zip(subset['S'], subset['L']))
 
-# Example input: 4p6 4d1 => [4,1,6,4,2,1]
-if __name__ == "__main__":
+        if conf_chunk not in result:
+            result[conf_chunk] = []
 
-    LSJ = calculate_LSJ(4 ,3 ,6 ,4 ,2 ,1)
-    print("Possible (L, S, J) values:")
-    for L, S, J in LSJ:
-        print(f"L = {L}, S = {S}, J = {J}")
+        result[conf_chunk].extend(pairs)
+
+    return result
+
+print(PossibleLSJ('4p54d3'))
+
+# we have sets of 
+
+def min_signed_sum(values):
+    min_val = float('inf')
+    for signs in product([-1, 1], repeat=len(values)):
+        total = sum(v * s for v, s in zip(values, signs))
+        min_val = min(min_val, abs(total))
+    return min_val
+
+def generate_SL_pairs(Lmax, Lmin, Smax, Smin):
+
+    SL_pairs = set()
+
+    # Include half-integer and integer S values, step size 0.5
+    s_values = [s * 0.5 for s in range(int(Smin * 2), int(Smax * 2) + 1)]
+    
+    # L is integer
+    for L in range(Lmin, Lmax + 1):
+        for S in s_values:
+            SL_pairs.add((S, L))
+    
+    return SL_pairs
+
+def total_possible_LS(config_dict):
+    # Get all the lists of (S, L) tuples
+    list_of_lists = list(config_dict.values())
+
+    unionset = set()
+    #print(list_of_lists)
+
+    # combine 3p3 with 4d1 with 4f2 in that sense
+    combinations = [list(p) for p in product(*list_of_lists)]
+
+    #print(len(combinations))
+    
+    for entry in combinations:
+
+        #print(entry)
+        Slist, Llist  = zip(*entry)
+        Slist, Llist = list(Slist), list(Llist)
+        Slistmax = sum(Slist)
+        Slistmin = min_signed_sum(Slist)
+        Llistmax = int(sum(Llist))
+        Llistmin = int(min_signed_sum(Llist))
+
+        # each Lmax, Lmin, Smax, Smin produces a set of allowed pairs of S,L values which you can image as square in the S,L plane
+        set0 = generate_SL_pairs(Llistmax, Llistmin, Slistmax, Slistmin)
+
+        #print("\n",entry)
+        #print(Slist, Llist)
+        #print(Slistmin, Slistmax, Llistmin, Llistmax)
+        #print(set0)
+
+    unionset = unionset.union(set0)
+
+    return unionset
+
+combinedict = PossibleLSJ('4p54d3')
+tpl = total_possible_LS(combinedict)
+
+print(tpl)
+
+
