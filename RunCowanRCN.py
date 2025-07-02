@@ -41,10 +41,10 @@ def totxt(substr: str):
 
         # Rename the file
         os.rename(ing11_path, ing11_txt_path)
-        print(f"Renamed {substr} to {substr}.txt.")
+        #print(f"Renamed {substr} to {substr}.txt.")
     else:
         print(f"File {substr} not found.")
-
+        
 
 totxt("ING11")
 totxt("OUT2")

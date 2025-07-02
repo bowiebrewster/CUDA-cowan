@@ -1,20 +1,45 @@
-def config_string_to_int(configuration):
-    if len(configuration) != 6:
-        raise Exception("Configuration must be length 6 others not implemented") #TODO
-    
-    l_map = {'s': 0, 'p': 1, 'd': 2, 'f': 3, 'g': 4, 'h': 5, 'i': 6, 'k': 7}
+from itertools import combinations
 
-    ni = int(configuration[0])
-    li = l_map[configuration[1]]
-    wi = int(configuration[2])
-    nj = int(configuration[3])
-    lj = l_map[configuration[4]]
-    wj = int(configuration[5])
-    return ni, li, wi, nj, lj, wj
+
+def config_string_to_int(configuration : str):
+    result = []
+
+    # Step 1: Identify character positions
+    char_positions = [i for i, c in enumerate(configuration) if c.isalpha()]
+
+    for idx, pos in enumerate(char_positions):
+        # Column 0: digit right before the character
+        num_before = int(configuration[pos - 1]) if pos > 0 and configuration[pos - 1].isdigit() else None
+
+        # Column 1: the character itself
+        l_map = {'s': 0, 'p': 1, 'd': 2, 'f': 3, 'g': 4, 'h': 5, 'i': 6, 'k': 7}
+        char = l_map[configuration[pos]]
+
+        # Determine end of slice for column 2
+        if idx + 1 < len(char_positions):
+            next_pos = char_positions[idx + 1]
+            slice_end = max(pos + 1, next_pos - 1)
+        else:
+            slice_end = len(configuration)  # last character: go to end
+
+        # Column 2: digits from pos+1 up to slice_end
+        digits_after = ''.join([c for c in configuration[pos + 1:slice_end] if c.isdigit()])
+        third_col = int(digits_after) if digits_after else 1
+
+        result.append([num_before, char, third_col])
+
+    # Optional: propagate first digit in col 0 if consistent
+    first_val = result[0][0]
+    if all(row[0] == first_val for row in result if row[0] is not None):
+        for row in result:
+            row[0] = first_val
+
+    return result
 
 
 def main(configuration):
-    ni, li, wi, nj, lj, wj = config_string_to_int(configuration)
+    configarray = config_string_to_int(configuration)
+    #print(configarray)
 
     # Initialize counts
     counts = {
@@ -36,20 +61,27 @@ def main(configuration):
     Fk(li,li).  If IABG = 2 or 4, then "Fk" represents F1, F2, F3, ... Fm, 
     and k likewise increases in unit steps for the Gk.
     """
+    print("configarray: ",configarray)
 
-    if 2 <= wi <= 4 * li:  # There are no Fk(li,li) unless 2.LE.wi.LE.4li;
-        counts['Fk_ii'] += li 
-    if 2 <= wj <= 4 * lj:  # There are no Fk(li,li) unless 2.LE.wi.LE.4li;
-        counts['Fk_ii'] += lj
+    for row in configarray:
+        [ni, li, wi] = row
 
-    if 1 <= wi <= 4 * li + 1 and 1 <= wj <= 4 * lj + 1:  # there are no Fk(li,lj) nor Gk(li,lj), i < j, unless 1.LE.w.LE.4l+1 for both wi and wj
-        counts['Fk_ij'] += min(li,lj)
-        counts['Gk_ij'] += int(((li + lj) - abs(li-lj))/2 + 1)
+        if 2 <= wi <= 4 * li:  # There are no Fk(li,li) unless 2.LE.wi.LE.4li;
+            counts['Fk_ii'] += li
 
-    if 1 <= wi <= 4 * li + 1 and li > 0: #There is no zetai unless 1.LE.wi.LE.4li+1 and li > 0. 
-        counts['zeta'] += 1
-    if 1 <= wj <= 4 * lj + 1 and lj > 0: #There is no zetai unless 1.LE.wi.LE.4li+1 and li > 0. 
-        counts['zeta'] += 1    
+        if 1 <= wi <= 4 * li + 1 and li > 0: #There is no zetai unless 1.LE.wi.LE.4li+1 and li > 0. 
+            counts['zeta'] += 1 
 
+    if len(configarray) > 1:
+        for row1, row2 in combinations(configarray, 2):
+            #print(row1, row2)
+            [ni, li, wi] = row1
+            [nj, lj, wj] = row2
+            
+            if 1 <= wi <= 4 * li + 1 and 1 <= wj <= 4 * lj + 1:  # there are no Fk(li,lj) nor Gk(li,lj), i < j, unless 1.LE.w.LE.4l+1 for both wi and wj
+                counts['Fk_ij'] += min(li,lj)
+                counts['Gk_ij'] += int(((li + lj) - abs(li-lj))/2 + 1)
+
+   
     return counts
 
