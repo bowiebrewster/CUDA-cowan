@@ -27,4 +27,4 @@ def copy_files(substr:str, indexstart, source_dir, destination_dir):
 # Example usage
 source_folder = r"C:\Users\brewster\Desktop\Bowie_calculations\Bowie_calculations"
 destination_folder = r"C:\Users\brewster\Desktop\CowanFrontend"
-copy_files('IN36',0, source_folder, destination_folder)
+copy_files('ING11',0, source_folder, destination_folder)
