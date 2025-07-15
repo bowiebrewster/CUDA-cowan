@@ -47,15 +47,6 @@ def format_line(prefix, suffix):
     return f"{prefix}{spaces}{suffix}"
 
 
-def line1(m):
-    return [f"   50",f"{m+6}Sn{m+5}+", f"4p64d{9-m}", f"3d10 4s2 4p6 4d{9-m}"]
-def line2(m):
-    return [f"   50",f"{m+6}Sn{m+5}+", f"4p54d{10-m}", f"3d10 4s2 4p6 4d{10-m}"]
-def line3(m):
-    return [f"   50",f"{m+6}Sn{m+5}+", f"4p64d{8-m}4f1", f"3d10 4s2 4p6 4d{8-m} 4f1"]
-
-lines = [line1, line2, line3]
-
 def write36(lines:list, m:int):
     allres = ["200-90 0 2  01.  0.2    5.E-08    1.E-11-2 00190 0 1.0  0.65  0.0 1.00   -6"]
 
@@ -78,24 +69,3 @@ def write36(lines:list, m:int):
     mainstr = "\n".join(allres)
 
     return mainstr
-
-def main():
-    for m in range(0, 1):
-        # write the in 36 file
-        mainstr = write36(lines, m)
-        filename = f"C:\\Users\\brewster\\Desktop\\CowanFrontend\\InputOutputCowan\\IN36"
-        with open(filename, "w") as f:
-            f.write(mainstr)
-
-        # run cowan with in36 file 
-        if False:
-            run_shell_script()
-
-            # rename the files to txt files with index
-            totxt(m,"IN36")
-            totxt(m,"ING11")
-            totxt(m,"OUT2")
-            totxt(m,"OUT36")
-
-
-main()
