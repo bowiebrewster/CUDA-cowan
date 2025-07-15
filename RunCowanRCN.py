@@ -46,6 +46,6 @@ def totxt(substr: str):
         print(f"File {substr} not found.")
         
 
-totxt("ING11")
-totxt("OUT2")
-totxt("OUT36")
+#totxt("ING11")
+#totxt("OUT2")
+#totxt("OUT36")

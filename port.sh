@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Go to the directory with the input files
-cd "/c/Users/brewster/Desktop/CUDA Cowan  redone" || { echo "cd failed"; exit 1; }
+cd "/c/Users/brewster/Desktop/CowanFrontend/InputOutputCowan" || { echo "cd failed"; exit 1; }
 
 # Run RCN.BAT using its absolute path
 echo "Running RCN.BAT..."

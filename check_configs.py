@@ -36,6 +36,21 @@ def config_string_to_int(configuration : str):
 
     return result
 
+def doublecheck(lis:list):
+    final_digits = {
+        "Eav": 0,  # Always 1 Eav per configuration
+        "Fk_ii": 0,  # Fk(li,li) for each subshell
+        "zeta": 0,  # zeta_i for each subshell
+        "Fk_ij": 0,  # Fk(li,lj) between subshells
+        "Gk_ij": 0,  # Gk(li,lj) between subshells
+        "Rk": 0
+    }
+    for entry in lis:
+        final_digits[final_digits.keys()[entry[-1]]] += 1
+
+    return final_digits
+
+
 
 def main(configuration):
     configarray = config_string_to_int(configuration)
@@ -61,7 +76,7 @@ def main(configuration):
     Fk(li,li).  If IABG = 2 or 4, then "Fk" represents F1, F2, F3, ... Fm, 
     and k likewise increases in unit steps for the Gk.
     """
-    print("configarray: ",configarray)
+    #print("configarray: ",configarray)
 
     for row in configarray:
         [ni, li, wi] = row
