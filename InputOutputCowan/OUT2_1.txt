@@ -6,8 +6,8 @@
  P 6    D 8    S 0    S 0    S 0    S 0    S 0    S 0         Sn6+   4p64d8          EAV=  -1352700.970 KK     EKIN=   0.0000 RY
  P 5    D 9    F 0    S 0    S 0    S 0    S 0    S 0         Sn6+   4p54d9          EAV=  -1352100.550 KK     EKIN=   0.0000 RY
  P 6    D 7    F 1    S 0    S 0    S 0    S 0    S 0         Sn6+   4p64d74f1       EAV=  -1352182.469 KK .
-Finished at                                  20:12:31.74, Tue 07/15/2025
-Time spent:                                  0 hr 0 min 0.5 sec
+Finished at                                  21:20:54.89, Tue 07/15/2025
+Time spent:                                  0 hr 0 min 0.4 sec
  1.00  1.00  1.00
      0.00000     3.56840
 1
@@ -23,7 +23,7 @@ Time spent:                                  0 hr 0 min 0.5 sec
 0
 
 0Sn6+   4p54d9   - 4p64d74f1     2    97.4369 5    58.4350 5     1.0000
-    2    3    2     0.000     0.000     0.000 SEC
+    2    3    2     0.016     0.000     0.016 SEC
  SQRTDEL=    1.0000    1.0000    2    97.4369      58.4350
 1
 
@@ -38,7 +38,7 @@ Time spent:                                  0 hr 0 min 0.5 sec
                                SQRTDEL=    1.0000                                         1.74339
 
 
-                    -99999999.          T=  0.000 SEC
+                    -99999999.          T=  0.016 SEC
 
 
 0FINISHED G5INP

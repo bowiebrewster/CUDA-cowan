@@ -61,9 +61,9 @@ def parse_ing11(file_path):
 
     return energy_levels, parameters, interactions1, interactions2
 
-
-def main(file_path):
-    return parse_ing11(file_path)
+string = f"InputOutputCowan\\ING11_{0}.txt"
+for val in parse_ing11(string):
+    print(val)
 
 #TODO
 # for implementing ING11_8
