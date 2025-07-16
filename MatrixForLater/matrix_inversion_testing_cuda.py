@@ -7,7 +7,7 @@ import importlib
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigsh
 
-import matrix_inversion_testing 
+import MatrixForLater.matrix_inversion_testing as matrix_inversion_testing 
 importlib.reload(matrix_inversion_testing)
 
 mat = matrix_inversion_testing.generate_symmetric_matrix_with_zeros

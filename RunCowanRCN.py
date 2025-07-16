@@ -48,7 +48,7 @@ def format_line(prefix, suffix):
 
 
 def write36(lines:list, m:int):
-    allres = ["200-90 0 2  01.  0.2    5.E-08    1.E-11-2 00190 0 1.0  0.65  0.0 1.00   -6"]
+    allres = ["200090 0 2  01.  0.2    5.E-08    1.E-11-2 00190 0 1.0  0.65  0.0 1.00   -6"]
 
     for line in lines:
         [part1,part2,part3,part4] = line(m)

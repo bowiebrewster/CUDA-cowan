@@ -1,73 +1,193 @@
-import numpy as np
 import re
+from typing import Tuple, List, Dict
 
-def parse_ing11(file_path):
-    energy_levels = {}
-    parameters = {}  
-    interactions1 = {}
-    interactions2 = {}
+def parse_atomic_file(content: str) -> Tuple[str, List[str], List[str], List[str], List[str]]:
+    """
+    Parse a formatted atomic structure file into 5 logical sections.
+
+    Returns:
+        Tuple containing:
+            - Section 1 (str): Header line (always the first line)
+            - Section 2 (List[str]): Lines starting with a capital letter and a number (e.g. configuration info)
+            - Section 3 (List[str]): Blocks starting with something like 'Sn5+ 4p64d...' with possible continuation lines
+            - Section 4 (List[str]): Transition lines with dash (e.g. '4p54d10 - 4p64d84 ...')
+            - Section 5 (List[str]): Remaining lines (interactions, tail data, etc.)
+    """
+    lines = content.strip().splitlines()
+
+    section1 = lines[0]
+    section2, section3, section4, section5 = [], [], [], []
+
+    state = 2  # Track current section
+
+    i = 1
+    while i < len(lines):
+        line = lines[i]
+
+        if state == 2:
+            if re.match(r'^[A-Z]\s+\d+', line):
+                section2.append(line)
+            else:
+                state = 3
+                continue
+
+        elif state == 3:
+            if re.match(r'^\w{1,2}\d*\+\s+\S+', line):
+                block_lines = [line]
+                i += 1
+                while i < len(lines) and not re.match(r'^\s*\S+\s*-\s*\S+', lines[i]) and not re.match(r'^\w{1,2}\d*\+\s+\S+', lines[i]):
+                    block_lines.append(lines[i])
+                    i += 1
+                section3.append("\n".join(block_lines))
+                continue
+            else:
+                state = 4
+                continue
+
+        elif state == 4:
+            if re.match(r'^\s*\S+\s*-\s*\S+', line):
+                section4.append(line)
+            else:
+                state = 5
+                continue
+
+        elif state == 5:
+            if line.strip():  # skip blank lines
+                section5.append(line)
+
+        i += 1
+
+    return section1, section2, section3, section4, section5
+
+
+def parse_section2(lines: List[str]) -> Dict[Tuple[str, str], float]:
+    result = {}
+
+    for line in lines:
+        tokens = line.split()
+
+        # Collect config parts that are NOT "S 0", "F 0", etc.
+        config_parts = []
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
+
+            # If it's a capital config like P, D, F, S and followed by a 0, skip both
+            if token in {"S", "F"} and i + 1 < len(tokens) and tokens[i + 1] == "0":
+                i += 2
+                continue
+
+            # If token is something like 'Sn5+', that's our element name
+            if re.match(r'^\w{1,2}\d*\+$', token):
+                element = token
+                break  # Stop scanning config tokens
+            else:
+                config_parts.append(token)
+                i += 1
+
+        # Get the energy value (assumed to be second-last float on the line)
+        try:
+            energy = float(tokens[-2])
+        except (ValueError, IndexError):
+            continue  # Skip malformed lines
+
+        key = (element, " ".join(config_parts))
+        result[key] = energy
+
+    return result
+
+
+def parse_section3(blocks: List[str]) -> Dict[Tuple[str, str], List[int]]:
+    """
+    Parse Section 3 blocks using the first number as a count of how many meaningful integers follow.
+
+    Args:
+        blocks (List[str]): List of strings (each block can be multiline)
+
+    Returns:
+        Dict[Tuple[str, str], List[int]]: Keys are (element, config), values are full numeric data lists
+    """
+    result = {}
+
+    for block in blocks:
+        # Flatten multiline blocks into a single line
+        flat = " ".join(block.splitlines())
+        tokens = flat.split()
+
+        # Extract element and configuration
+        try:
+            element = tokens[0]
+            config = tokens[1]
+        except IndexError:
+            continue
+
+        # Collect integers, ignoring invalid or placeholder tokens
+        numbers = []
+        for token in tokens[2:]:
+            if token == '00' or re.match(r'^0\.00E\+\d+$', token) or token.startswith('hr'):
+                continue
+            try:
+                val = int(token)
+                numbers.append(val)
+            except ValueError:
+                continue
+
+        if numbers:
+            count = numbers[0]
+            expected = numbers[:count + 1]  # Include count itself + the specified number of entries
+            result[(element, config)] = expected
+
+    return result
+
+def parse_section4(lines: List[str]) -> Dict[Tuple[str, str], List[float]]:
+    """
+    Parse Section 4 lines to extract orbital transitions and associated float values.
+
+    Args:
+        lines (List[str]): Lines from Section 4
+
+    Returns:
+        Dict[Tuple[str, str], List[float]]: Keys are (orbital1, orbital2),
+                                            values are a list of three floats
+    """
+    result = {}
+
+    for line in lines:
+        tokens = line.split()
+        try:
+            # Locate the dash separator
+            dash_index = tokens.index('-')
+            orb1 = tokens[dash_index - 1]
+            orb2 = tokens[dash_index + 1]
+        except (ValueError, IndexError):
+            continue  # Skip malformed lines
+
+        # Extract up to 3 floats after the dash
+        floats = []
+        for token in tokens[dash_index + 2:]:
+            if token.startswith('hr'):
+                break
+            try:
+                floats.append(float(token))
+            except ValueError:
+                continue
+
+        if len(floats) >= 3:
+            result[(orb1, orb2)] = floats[:3]
+
+    return result
+
+#TODO interpret section 1 and section 5 if necesarry
+
+def main(path):
+    with open(path, 'r') as f:
+        content = f.read()
+
+    section1, section2, section3, section4, section5 = parse_atomic_file(content)
+
+    dict2 = parse_section2(section2)
+    dict3 = parse_section3(section3)
+    dict4 = parse_section4(section4)
     
 
-    ion_pattern = r'[A-Z][a-z]?\d*\+'
-    stage = 0
-
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    
-    for line in lines[1:]:
-        
-        # Step 1: average energies
-        # P 6  D 2  S 0  S 0  S 0  S 0  S 0  S 0  Sn12+  4p64d2      -1344349.342   0.0000
-        match1 = re.match(r'(?:[A-Z]\s+\d+\s+){7}[A-Z]\s+\d+', line)
-        if match1 and stage <= 1:
-            stage = 1
-            key = line.split()[16]+ " "+line.split()[17]
-            value = line.split()[18]
-            energy_levels[key] = value
-
-        # Step 2: # To store Fk, zetai, Gk, Rk, etc.
-        # Sn12+  4p64d2      7   5675090  10124861   6846241 0.00E+001 0.00E+001hr87998787
-        # 0.00E+001    486792
-        match2 = re.match(rf'({ion_pattern})\s+(\S+)\s+(\d+)\s+(.*)', line)
-        if match2 and stage <= 2:
-            stage = 2
-            filtered_data = [item for item in line.split()[3:-1] if 'hr' not in item and '0.00E+' not in item and not float(item) == 0]
-            comb_key= line.split()[0]+" "+line.split()[1]
-            parameters[comb_key] = filtered_data
-
-
-        match3 = re.match(r'\s*(\S+)\s*-\s*(\S+)\s+(.*)', line)
-        if match3 and stage <= 3:
-            stage = 3
-            state1, state2, value = match3.groups()
-            key = f"{state1} - {state2}"
-            filtered_data = [item for item in line.split()[4:-1] if 'hr' not in item and '0.00E+' not in item and not float(item) == 0]
-            interactions1[key] = filtered_data
-
-        # step 4: interactions 2
-        # Sn12+  4p64d2       Sn12+  4p54d3          1.17716( 4P//R1// 4D)-0.999hr -97 -98
-        pattern = r'(Sn\d+\+\s+\S+)\s+(Sn\d+\+\s+\S+)\s+([-\d.]+\(\s*[^)]+\)-?\d*\.?\d*\w*\s+-?\d+\s+-?\d+)'
-        match4 = re.match(pattern, line)
-        if match4 and stage <= 4:
-            stage = 4
-            key = line.split()[0]+" "+line.split()[1]+" "+line.split()[2]+" "+line.split()[3]
-            value = line.split()[4:-1]
-            interactions2[key] = value
-        
-        # extra F,G,K's after checking if not stage 3
-        if not match2 and stage == 2:
-            filtered_data = [item for item in line.split() if 'hr' not in item and '0.00E+' not in item]
-            parameters[comb_key] += filtered_data
-
-    return energy_levels, parameters, interactions1, interactions2
-
-string = f"InputOutputCowan\\ING11_{0}.txt"
-for val in parse_ing11(string):
-    print(val)
-
-#TODO
-# for implementing ING11_8
-# this line also rolls over
-#  p34f    - pdf2    7 100.23445 124.27465  79.74315  96.22265  66.41725hr85998585
-#  95.33205  64.24935
-# stages revert sometimes for some reason 
+    return dict2, dict3, dict4
